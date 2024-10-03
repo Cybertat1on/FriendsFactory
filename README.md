@@ -54,7 +54,7 @@ Before you begin, make sure you have the following installed:
 3. Record the `API_ID` and `API_HASH` provided after registering your application in the `.env` file.
 
 ## Installation
-You can download the [**repository**](https://github.com/Cybertat1on/FriendsFactory.git) by cloning it to your system and installing the necessary dependencies:
+You can download the [**repository**](https://github.com/Cybertat1on/FriendsFactory) by cloning it to your system and installing the necessary dependencies:
 ```shell
 git clone https://github.com/Cybertat1on/FriendsFactory.git
 cd FriendsFactory
@@ -125,9 +125,9 @@ You can also use arguments for quick start, for example:
 
 You can also use arguments for quick start, for example:
 ```termux
-~/Fabrika-Friends-Factory > python main.py --action (1/2)
+~/FriendsFactory > python main.py --action (1/2)
 # Or
-~/Fabrika-Friends-Factory > python main.py -a (1/2)
+~/FriendsFactory > python main.py -a (1/2)
 
 # 1 - Run clicker
 # 2 - Creates a session 
