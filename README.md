@@ -3,6 +3,7 @@
 
 #  Bot for FriendsFactroy
 
+![start-fabrika](https://github.com/user-attachments/assets/1e3ac93a-d7d7-410a-aaf2-70fb661eb336)
 
 
 # 🔥🔥 PYTHON version must be 3.10 - 3.11.5 🔥🔥
