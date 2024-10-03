@@ -52,10 +52,10 @@
 3. Запишите `API_ID` и `API_HASH` в файле `.env`, предоставленные после регистрации вашего приложения.
 
 ## Установка
-Вы можете скачать [**Репозиторий**](https://github.com/Cybertat1on/FriendsFactory.git) клонированием на вашу систему и установкой необходимых зависимостей:
+Вы можете скачать [**Репозиторий**](https://github.com/Cybertat1on/FriendsFactory) клонированием на вашу систему и установкой необходимых зависимостей:
 ```shell
-git clone https://github.com/Cybertat1on/FriendsFactory.git.git
-cd BoinkersBot
+git clone https://github.com/Cybertat1on/FriendsFactory.git
+cd FriendsFactory
 ```
 
 Затем для автоматической установки введите:
@@ -83,9 +83,9 @@ python3 main.py
 
 Также для быстрого запуска вы можете использовать аргументы, например:
 ```shell
-~/BoinkersBot >>> python3 main.py --action (1/2)
+~/FriendsFactory >>> python3 main.py --action (1/2)
 # Or
-~/BoinkersBot >>> python3 main.py -a (1/2)
+~/FriendsFactory >>> python3 main.py -a (1/2)
 
 # 1 - Запускает кликер
 # 2 - Создает сессию
@@ -104,9 +104,9 @@ python main.py
 
 Также для быстрого запуска вы можете использовать аргументы, например:
 ```shell
-~/BoinkersBot >>> python main.py --action (1/2)
+~/FriendsFactory >>> python main.py --action (1/2)
 # Или
-~/BoinkersBot >>> python main.py -a (1/2)
+~/FriendsFactory >>> python main.py -a (1/2)
 
 # 1 - Запускает кликер
 # 2 - Создает сессию
@@ -123,9 +123,9 @@ python main.py
 
 Также для быстрого запуска вы можете использовать аргументы, например:
 ```termux
-~/Fabrika-Friends-Factory > python main.py --action (1/2)
+~/FriendsFactory > python main.py --action (1/2)
 # Or
-~/Fabrika-Friends-Factory > python main.py -a (1/2)
+~/FriendsFactory > python main.py -a (1/2)
 
 # 1 - Run clicker
 # 2 - Creates a session 
