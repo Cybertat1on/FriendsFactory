@@ -2,6 +2,7 @@ import os
 import glob
 import asyncio
 import argparse
+import sys
 from itertools import cycle
 
 from pyrogram import Client
@@ -11,6 +12,7 @@ from bot.config import settings
 from bot.utils import logger
 from bot.core.tapper import run_tapper, run_tapper1
 from bot.core.registrator import register_sessions
+from .cheker import check_base_url
 
 
 start_text = """
@@ -81,6 +83,10 @@ async def process() -> None:
     parser.add_argument("-a", "--action", type=int, help="Action to perform")
 
     logger.info(f"Detected {len(get_session_names())} sessions | {len(get_proxies())} proxies")
+
+    if check_base_url() is False:
+        sys.exit(
+            "Detected api change! Stoped the bot for safety. Contact me here to update the bot: https://t.me/cyb3rtati0n")
 
     action = parser.parse_args().action
 

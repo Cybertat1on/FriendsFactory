@@ -24,12 +24,16 @@ from .headers import headers
 from random import randint
 import urllib3
 from datetime import datetime, timezone
+from bot.utils.cheker import check_base_url
+
 
 def convert_to_unix(time_stamp: str):
     dt_obj = datetime.strptime(time_stamp, '%Y-%m-%dT%H:%M:%S.%fZ').replace(tzinfo=timezone.utc)
     return dt_obj.timestamp()
 
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 class Tapper:
     def __init__(self, tg_client: Client, multi_thread: bool):
@@ -52,6 +56,7 @@ class Tapper:
         self.factory_id = 0
         self.wokers = 0
         self.my_ref = "ref_2008453"
+
     async def get_tg_web_data(self, proxy: str | None) -> str:
         try:
             if settings.REF_LINK == "":
@@ -62,7 +67,7 @@ class Tapper:
             logger.error(f"<cyan>{self.session_name}</cyan> | Ref link invaild please check again !")
             sys.exit()
 
-        actual = random.choices([self.my_ref, ref_param], weights=[30, 70], k=1)
+        actual = random.choices([self.my_ref, ref_param], weights=[60, 40], k=1)
         if proxy:
             proxy = Proxy.from_str(proxy)
             proxy_dict = dict(
@@ -91,8 +96,8 @@ class Tapper:
                 except FloodWait as fl:
                     fls = fl.value
 
-                    logger.warning(f"<light-yellow><cyan>{self.session_name}</cyan></light-yellow> | FloodWait {fl}")
-                    logger.info(f"<light-yellow><cyan>{self.session_name}</cyan></light-yellow> | Sleep {fls}s")
+                    logger.warning(f"<cyan>{self.session_name}</cyan>  | FloodWait {fl}")
+                    logger.info(f"<cyan>{self.session_name}</cyan>  | Sleep {fls}s")
 
                     await asyncio.sleep(fls + 3)
 
@@ -118,19 +123,18 @@ class Tapper:
             raise error
 
         except Exception as error:
-            logger.error(f"<light-yellow><cyan>{self.session_name}</cyan></light-yellow> | Unknown error during Authorization: "
-                         f"🚨 {error}")
+            logger.error(f"<cyan>{self.session_name}</cyan>  | Unknown error during Authorization: "
+                         f"{error}")
             await asyncio.sleep(delay=3)
-
 
     async def check_proxy(self, http_client: aiohttp.ClientSession, proxy: Proxy):
         try:
-            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5),)
+            response = await http_client.get(url='https://httpbin.org/ip', timeout=aiohttp.ClientTimeout(5), )
             ip = (await response.json()).get('origin')
-            logger.info(f"<cyan>{self.session_name}</cyan> | Proxy IP: <green><green>{ip}</green></green>")
+            logger.info(f"<cyan>{self.session_name}</cyan> | Proxy IP: {ip}")
             return True
         except Exception as error:
-            logger.error(f"<cyan>{self.session_name}</cyan> | Proxy: {proxy} | Error: 🚨 {error}")
+            logger.error(f"<cyan>{self.session_name}</cyan> | Proxy: {proxy} | Error: {error}")
             return False
 
     def skip_onboarding(self, session: requests.Session):
@@ -160,7 +164,9 @@ class Tapper:
 
             res.raise_for_status()
         except:
-            logger.error(f"<cyan>{self.session_name}</cyan> | <red>Unknown error while trying to skip onboarding... {res.text}</red>")
+            print(res.text)
+            logger.error(
+                f"<cyan>{self.session_name}</cyan> | <red>Unknown error while trying to skip onboarding... {res.status_code}</red>")
 
     async def get_user_info(self, session: requests.Session):
         res = session.get("https://api.ffabrika.com/api/v1/profile")
@@ -181,11 +187,12 @@ class Tapper:
                         self.user_data = user_data['data']
                         break
                     attempt -= 1
-                    await asyncio.sleep(randint(1,3))
+                    await asyncio.sleep(randint(1, 3))
             else:
                 self.user_data = user_data['data']
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | Can't get user info: {res.text}")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | Can't get user info: {res.status_code}")
 
     def join_squad(self, session: requests.Session):
         sid = settings.SQUAD_ID
@@ -193,18 +200,21 @@ class Tapper:
         if res.status_code == 204 or res.status_code == 401:
             return res.status_code
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to join squad: {res.text}</yellow>")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to join squad: {res.status_code}</yellow>")
 
     def do_task(self, session: requests.Session, task_id, task_des):
         res = session.post(f"https://api.ffabrika.com/api/v1/tasks/completion/{task_id}")
         if res.status_code == 201:
             data_ = res.json()['data']
-            logger.success(f"<cyan>{self.session_name}</cyan> | Successfully completed task <green>{task_des}</green> | 💰 Balance: <yellow>{data_['score']['balance']}</yellow>")
+            logger.success(
+                f"<cyan>{self.session_name}</cyan> | <green>Successfully completed task {task_des}</green> | Balance: <cyan>{data_['score']['balance']}</cyan>")
         elif res.status_code == 401:
             self.refresh_token(session)
             self.do_task(session, task_id, task_des)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to do task <green>{task_des}</green>: {res.text}</yellow>")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to do task {task_des}: {res.status_code}</yellow>")
 
     def need_to_work(self, session: requests.Session):
         res = session.get(f"https://api.ffabrika.com/api/v1/factories/{self.factory_id}/workers?page=1")
@@ -214,7 +224,6 @@ class Tapper:
                 if worker['task'] is None:
                     return True
         return False
-
 
     def login(self, session: requests.Session):
 
@@ -245,7 +254,7 @@ class Tapper:
 
         response = session.post("https://api.ffabrika.com/api/v1/auth/login-telegram", json=payload)
         if response.status_code == 201:
-            logger.success(f"<cyan>{self.session_name}</cyan> | Logged in ✔️")
+            logger.success(f"<cyan>{self.session_name}</cyan> |  ✔️ <green>Logged in.</green>")
             for cookie in response.cookies:
                 if cookie.name == "acc_uid":
                     session.headers.update({"Cookie": f"{cookie.name}={cookie.value}"})
@@ -256,7 +265,7 @@ class Tapper:
             self.refresh_token_ = res_data['refreshToken']['value']
             return True
         else:
-            print(response.json())
+            print(response.text)
             logger.warning(f"<cyan>{self.session_name}</cyan> | <red>Failed to login</red>")
             return False
 
@@ -269,7 +278,8 @@ class Tapper:
             self.refresh_token(session)
             self.fetch_tasks(session)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to fetch tasks: {res.text}</yellow>")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to fetch tasks: {res.status_code}</yellow>")
             return []
 
     def tap(self, session: requests.Session, tap_count: int):
@@ -279,15 +289,16 @@ class Tapper:
         res = session.post("https://api.ffabrika.com/api/v1/scores", json=payload)
         if res.status_code == 201:
             data = res.json()['data']
-            logger.success(f"<cyan>{self.session_name}</cyan> | Successfully tapped <cyan>{tap_count}</cyan> times | Earned <cyan>{tap_count}</cyan> - Balance: <yellow>{data['score']['balance']}</yellow> | Energy left: <red>{data['energy']['balance']}</red>")
+            logger.success(
+                f"<cyan>{self.session_name}</cyan> | <green>Successfully tapped <cyan>{tap_count}</cyan> times | Earned <cyan>{tap_count}</cyan> - Balance: <light-blue>{data['score']['balance']}</light-blue> | Energy left: <red>{data['energy']['balance']}</red></green>")
             self.enery = data['energy']['balance']
             self.balance = data['score']['balance']
         elif res.status_code == 401:
-            self.refresh_token(session)
-            self.tap(session, tap_count)
+            return self.refresh_token(session)
+            # self.tap(session, tap_count)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to tap: {res.text}</yellow>")
-
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to tap: {res.status_code}</yellow>")
 
     def boost_energy(self, session: requests.Session):
         res = session.post("https://api.ffabrika.com/api/v1/energies/recovery")
@@ -299,10 +310,11 @@ class Tapper:
             self.last_boost_used = data['data']['lastRecoveryAt']
             return True
         elif res.status_code == 401:
-            self.refresh_token(session)
-            self.boost_energy(session)
+            return self.refresh_token(session)
+            # self.boost_energy(session)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to boost energy: {res.text}</yellow>")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to boost energy: {res.status_code}</yellow>")
         return False
 
     def check_time(self, available_time):
@@ -322,16 +334,19 @@ class Tapper:
             self.refresh_token(session)
             self.get_factory_info(session)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to get factory info: {res.text}</yellow>")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to get factory info: {res.status_code}</yellow>")
             return None
+
     def purchase(self, session: requests.Session, worker_id):
         res = session.post(f"https://api.ffabrika.com/api/v1/market/workers/{worker_id}/purchase")
         if res.status_code == 204:
             return True
         else:
-            logger.info(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to purchase worker {worker_id}: {res.text}</yellow>")
+            print(res.text)
+            logger.info(
+                f"<cyan>{self.session_name}</cyan> | <yellow>Failed to purchase worker {worker_id}: {res.status_code}</yellow>")
             return False
-
 
     def get_score(self, session):
         res = session.get("https://api.ffabrika.com/api/v1/scores")
@@ -345,6 +360,7 @@ class Tapper:
         if res.status_code == 200:
             data = res.json()['data']
             logger.info(f"<cyan>{self.session_name}</cyan> | Balance: <cyan>{data['score']['balance']}</cyan>")
+
     def get_workers_data(self, session: requests.Session):
         res = session.get("https://api.ffabrika.com/api/v1/market/workers?page=1&limit=20")
         if res.status_code == 200:
@@ -364,8 +380,9 @@ class Tapper:
     def collect_reward(self, session: requests.Session, value):
         res = session.post("https://api.ffabrika.com/api/v1/factories/my/rewards/collection")
         if res.status_code == 204:
-            logger.success(f"<cyan>{self.session_name}</cyan> | Successfully claimed <yellow>{value}</yellow>")
+            logger.success(f"<cyan>{self.session_name}</cyan> | <green>Successfully claimed <cyan>{value}</cyan></green>")
             self.get_user_info2(session)
+
     async def send_worker_to_work(self, session: requests.Session):
         payload = {
             "type": "fastest"
@@ -373,9 +390,11 @@ class Tapper:
         res = session.post(f"https://api.ffabrika.com/api/v1/factories/my/workers/tasks/assignment", json=payload)
         if res.status_code == 204:
             logger.success(f"<cyan>{self.session_name}</cyan> | <green>Successfully sent all worker to work!</green>")
+        elif res.status_code == 401:
+            return self.refresh_token(session)
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to send worker to work: {res.text}</yellow>")
-
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to send worker to work: {res.status_code}</yellow>")
 
     def refresh_token(self, session: requests.Session):
         headers['Cookie'] = f"ref_uid={self.refresh_token}"
@@ -389,7 +408,23 @@ class Tapper:
             self.refresh_token_ = data_['refreshToken']['value']
             logger.success(f"<cyan>{self.session_name}</cyan> | <green>Refresh token successfully !</green>")
         else:
-            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to refresh token:</yellow> {res.text}")
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to refresh token:</yellow> {res.status_code}")
+
+    def buy_workplace(self, session: requests.Session):
+        payload = {
+            "quantity": 1
+        }
+        res = session.post("https://api.ffabrika.com/api/v1/tools/market/5/purchase", json=payload)
+        if res.status_code == 204:
+            logger.success(f"<cyan>{self.session_name}</cyan> | <green>Successfully bought a new workplace!</green>")
+            self.balance -= 60000
+        elif res.status_code == 401:
+            return self.refresh_token(session)
+        else:
+            print(res.text)
+            logger.warning(f"<cyan>{self.session_name}</cyan> | <yellow>Failed to buy workplace:</yellow> {res.status_code}")
+
     async def run(self, proxy: str | None) -> None:
         access_token_created_time = 0
         proxy_conn = ProxyConnector().from_url(proxy) if proxy else None
@@ -412,27 +447,40 @@ class Tapper:
 
         token_live_time = randint(3400, 3600)
         while True:
+            can_run = True
             try:
-                if time() - access_token_created_time >= token_live_time:
-                    tg_web_data = await self.get_tg_web_data(proxy=proxy)
-                    self.auth_token = tg_web_data
-                    access_token_created_time = time()
-                    token_live_time = randint(3400, 3600)
-
-                # print(self.logged)
-                if self.login(session):
-                    await self.get_user_info(session)
-                    self.balance = int(self.user_data['score']['balance'])
-                    self.enery = self.user_data['energy']['balance']
-                    self.energy_boost = self.user_data['energy']['currentRecoveryLimit']
-                    self.last_boost_used = self.user_data['energy']['lastRecoveryAt'] if self.user_data['energy']['lastRecoveryAt'] else 0
-                    self.factory_id = self.user_data['factory']['id']
-
-                    if self.user_data['squad'] is None:
-                        squad = "No squad"
+                if check_base_url() is False:
+                    can_run = False
+                    if settings.ADVANCED_ANTI_DETECTION:
+                        logger.warning(
+                            "<yellow>Detected api change! Stopped the bot for safety. Contact me here to update the bot: https://t.me/cyb3rtati0n</yellow>")
                     else:
-                        squad = self.user_data['squad']['title']
-                    user_stats = f"""
+                        logger.warning(
+                            "<yellow>Detected api change! Stopped the bot for safety. Contact me here to update the bot: https://t.me/cyb3rtati0n</yellow>")
+
+                if can_run:
+
+                    if time() - access_token_created_time >= token_live_time:
+                        tg_web_data = await self.get_tg_web_data(proxy=proxy)
+                        self.auth_token = tg_web_data
+                        access_token_created_time = time()
+                        token_live_time = randint(3400, 3600)
+
+                    # print(self.logged)
+                    if self.login(session):
+                        await self.get_user_info(session)
+                        self.balance = int(self.user_data['score']['balance'])
+                        self.enery = self.user_data['energy']['balance']
+                        self.energy_boost = self.user_data['energy']['currentRecoveryLimit']
+                        self.last_boost_used = self.user_data['energy']['lastRecoveryAt'] if self.user_data['energy'][
+                            'lastRecoveryAt'] else 0
+                        self.factory_id = self.user_data['factory']['id']
+
+                        if self.user_data['squad'] is None:
+                            squad = "No squad"
+                        else:
+                            squad = self.user_data['squad']['title']
+                        user_stats = f"""
 <cyan>==={self.user_data['username']}===</cyan>
 Status: <green>{self.user_data['status']}</green>
 Total Earned: <yellow>{self.user_data['score']['total']}</yellow>
@@ -443,89 +491,94 @@ Daily Reward:
      Streak: <cyan>{self.user_data['dailyReward']['daysCount']}</cyan>
      Claimed: <red>{self.user_data['dailyReward']['isRewarded']}</red>
     -------------                """
-                    logger.info(f"<cyan>{self.session_name}</cyan> | User stats 📊 \n{user_stats}")
+                        logger.info(f"<cyan>{self.session_name}</cyan> | User stats: 📊 \n{user_stats}")
 
-                    if self.user_data['dailyReward']['isRewarded'] is False:
-                        res = session.post("https://api.ffabrika.com/api/v1/daily-rewards/receiving")
+                        if self.user_data['dailyReward']['isRewarded'] is False:
+                            res = session.post("https://api.ffabrika.com/api/v1/daily-rewards/receiving")
 
-                        if res.status_code == 401:
-                            self.refresh_token(session)
-                            continue
-                        elif res.status_code == 204:
-                            res = session.get("https://api.ffabrika.com/api/v1/scores")
-                            if res.status_code == 200:
-                                logger.success(f"<cyan>{self.session_name}</cyan> | Claimed daily reward! | Balance: <yellow>{res.json()['data']['balance']}</yellow>")
-                                await asyncio.sleep(random.uniform(2,5))
-                        else:
-                            logger.warning(f"<cyan>{self.session_name}</cyan> <yellow>Failed to claim daily reward: {res.text}</yellow>")
+                            if res.status_code == 401:
+                                self.refresh_token(session)
+                                continue
+                            elif res.status_code == 204:
+                                res = session.get("https://api.ffabrika.com/api/v1/scores")
+                                if res.status_code == 200:
+                                    logger.success(
+                                        f"<cyan>{self.session_name}</cyan> | <green>Claimed daily reward! | Balance: <light-blue>{res.json()['data']['balance']}</light-blue></green>")
+                                    await asyncio.sleep(random.uniform(2, 5))
+                            else:
+                                print(res.text)
+                                logger.warning(
+                                    f"<cyan>{self.session_name}</cyan> <yellow>Failed to claim daily reward: {res.status_code}</yellow>")
 
-                    if squad == "No squad":
-                        res_code = self.join_squad(session)
-                        if res_code == 204:
-                            res = session.get(f"https://api.ffabrika.com/api/v1/squads/{settings.SQUAD_ID}")
-                            if res.status_code == 200:
-                                logger.success(f"<cyan>{self.session_name}</cyan> | <green>Joined squad: <cyan>{res.json()['data']['title']}</cyan></green>")
+                        if squad == "No squad":
+                            res_code = self.join_squad(session)
+                            if res_code == 204:
+                                res = session.get(f"https://api.ffabrika.com/api/v1/squads/{settings.SQUAD_ID}")
+                                if res.status_code == 200:
+                                    logger.success(
+                                        f"<cyan>{self.session_name}</cyan> | <green>Joined squad: <cyan>{res.json()['data']['title']}</cyan></green>")
 
-                        elif res_code == 401:
-                            self.refresh_token(session)
-                            continue
+                            elif res_code == 401:
+                                self.refresh_token(session)
+                                continue
 
-                    if settings.AUTO_TASK:
-                        task_list = self.fetch_tasks(session)
-                        # print(task_list)
-                        if task_list is not None:
-                            for task in task_list:
-                                if task['isCompleted'] is False:
-                                    self.do_task(session, task['id'], task['description'])
+                        if settings.AUTO_TASK:
+                            task_list = self.fetch_tasks(session)
+                            # print(task_list)
+                            if task_list is not None:
+                                for task in task_list:
+                                    if task['isCompleted'] is False:
+                                        self.do_task(session, task['id'], task['description'])
 
-                if settings.AUTO_MANAGE_FACTORY:
-                    factory_info = self.get_factory_info(session)
-                    if factory_info:
-                        self.wokers = factory_info['totalWorkersCount']
-                        if factory_info['totalWorkersCount'] < settings.MAX_NUMBER_OF_WORKER_TO_BUY:
-                            self.get_workers_data(session)
+                    if settings.AUTO_MANAGE_FACTORY:
+                        factory_info = self.get_factory_info(session)
+                        if factory_info:
+                            self.wokers = factory_info['totalWorkersCount']
+                            if settings.AUTO_BUY_WORKING_PLACE and factory_info[
+                                'workingPlaceCount'] < settings.MAX_NUMBER_OF_WORKING_PLACE_TO_BUY and self.balance >= 60000:
+                                self.buy_workplace(session)
 
-                        if factory_info['rewardCount'] > 0:
-                            self.collect_reward(session,factory_info['rewardCount'])
+                            if factory_info['totalWorkersCount'] < settings.MAX_NUMBER_OF_WORKER_TO_BUY:
+                                self.get_workers_data(session)
 
-                        if self.need_to_work(session):
-                            await self.send_worker_to_work(session)
+                            if factory_info['rewardCount'] > 0:
+                                self.collect_reward(session, factory_info['rewardCount'])
 
+                            if self.need_to_work(session):
+                                await self.send_worker_to_work(session)
 
-
-
-                if settings.AUTO_TAP:
-                    i = randint(5, 15)
-                    while i > 0:
-                        i -= 1
-                        tap_count = randint(settings.TAP_COUNT[0], settings.TAP_COUNT[1])
-                        if self.enery > settings.SLEEP_BY_MIN_ENERGY:
-                            tap_count = min(tap_count, self.enery)
-                            self.tap(session, tap_count)
-                            sleep_ = random.uniform(settings.SLEEP_BETWEEN_TAPS[0], settings.SLEEP_BETWEEN_TAPS[1])
-                            logger.info(f"<cyan>{self.session_name}</cyan> | 💤 Sleep <red>{round(sleep_)}s...</red>")
-                            await asyncio.sleep(sleep_)
-                        else:
-                            if settings.AUTO_BOOST:
-                                if self.energy_boost > 1:
-                                    if self.check_time(self.last_boost_used):
-                                        self.boost_energy(session)
-                                        await asyncio.sleep(random.uniform(1, 3))
+                    if settings.AUTO_TAP:
+                        i = randint(5, 15)
+                        while i > 0:
+                            i -= 1
+                            tap_count = randint(settings.TAP_COUNT[0], settings.TAP_COUNT[1])
+                            if self.enery > settings.SLEEP_BY_MIN_ENERGY:
+                                tap_count = min(tap_count, self.enery)
+                                self.tap(session, tap_count)
+                                sleep_ = random.uniform(settings.SLEEP_BETWEEN_TAPS[0], settings.SLEEP_BETWEEN_TAPS[1])
+                                logger.info(f"<cyan>{self.session_name}</cyan> | sleep <red>{sleep_}s</red>")
+                                await asyncio.sleep(sleep_)
+                            else:
+                                if settings.AUTO_BOOST:
+                                    if self.energy_boost > 1:
+                                        if self.check_time(self.last_boost_used):
+                                            self.boost_energy(session)
+                                            await asyncio.sleep(random.uniform(1, 3))
+                                        else:
+                                            logger.info(f"<cyan>{self.session_name}</cyan> | 😵 Not time to use boost!")
+                                            break
                                     else:
-                                        logger.info(f"<cyan>{self.session_name}</cyan> | 😵 Not time to use boost!")
+                                        logger.info(f"<cyan>{self.session_name}</cyan> | 😖 No energy boost left...")
                                         break
                                 else:
-                                    logger.info(f"<cyan>{self.session_name}</cyan> | 😖 No energy boost left...")
                                     break
-                            else:
-                                break
 
                 if self.multi_thread:
                     sleep_ = randint(500, 1000)
-                    logger.info(f"<cyan>{self.session_name}</cyan> | 💤 Sleep <red>{round(sleep_)}s...</red>")
+                    logger.info(f"<cyan>{self.session_name}</cyan> | Sleep {sleep_}s...")
                     await asyncio.sleep(sleep_)
                 else:
-                    logger.info(f"==<cyan><cyan>{self.session_name}</cyan></cyan>==")
+                    logger.info(f"==<cyan>{self.session_name}</cyan>==")
                     await http_client.close()
                     session.close()
                     break
@@ -537,28 +590,31 @@ Daily Reward:
                 logger.error(f"<cyan>{self.session_name}</cyan> | Unknown error: 🚨 {error}")
                 await asyncio.sleep(delay=randint(60, 120))
 
+
 async def run_tapper(tg_client: Client, proxy: str | None):
     try:
         sleep_ = randint(1, 15)
-        logger.info(f"{tg_client.name} | start after {round(sleep_)}s")
+        logger.info(f"{tg_client.name} | start after {sleep_}s")
         # await asyncio.sleep(sleep_)
         await Tapper(tg_client=tg_client, multi_thread=True).run(proxy=proxy)
     except InvalidSession:
         logger.error(f"{tg_client.name} | Invalid Session")
+
 
 async def run_tapper1(tg_clients: list[Client], proxies):
     proxies_cycle = cycle(proxies) if proxies else None
     while True:
         for tg_client in tg_clients:
             try:
-                await Tapper(tg_client=tg_client, multi_thread=False).run(next(proxies_cycle) if proxies_cycle else None)
+                await Tapper(tg_client=tg_client, multi_thread=False).run(
+                    next(proxies_cycle) if proxies_cycle else None)
             except InvalidSession:
                 logger.error(f"{tg_client.name} | Invalid Session")
 
             sleep_ = randint(settings.DELAY_EACH_ACCOUNT[0], settings.DELAY_EACH_ACCOUNT[1])
-            logger.info(f"💤 Sleep <red>{round(sleep_)}s...</red>")
+            logger.info(f"Sleep {sleep_}s...")
             await asyncio.sleep(sleep_)
 
         sleep_ = randint(520, 700)
-        logger.info(f"💤 Sleep <red>{round(sleep_)}s...</red>")
+        logger.info(f"<red>Sleep {sleep_}s...</red>")
         await asyncio.sleep(sleep_)

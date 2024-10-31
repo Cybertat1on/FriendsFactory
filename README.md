@@ -22,20 +22,22 @@
 | Support for pyrogram .session                     						|        ✔️        |
 
 ## [Settings](https://github.com/Cybertat1on/FriendsFactory.git/blob/main/.env-example)
-| Settings 				   	     	 |												 Description 											 |
-|----------------------------------|:-------------------------------------------------------------------------------------------------------:|
-| **API_ID / API_HASH**      | Platform data from which to run the Telegram session (default - android)                                      |       
-| **REF_LINK**               | Put your ref link here (10% for me)			                                                             |
-| **AUTO_TASK**              | Auto do tasks (default: True)                                                                                 |
-| **AUTO_TAP**               | Auto tap to earn point (default: True)                                                                        |
-| **AUTO_BOOST**             | Auto use full energy boost (default: True)                                                                    |
-| **TAP_COUNT**              | Random ammount of taps (default: [30, 75])                                                                    |
-| **SLEEP_BY_MIN_ENERGY**    | Minium energy to sleep (default: 100)                                                                         |
-| **SLEEP_BETWEEN_TAPS**     | Random sleep time between each taps (default: [15, 30])                                                       |
-| **AUTO_MANAGE_FACTORY**    | Auto manage factory (default: True)                                                                           |
-| **AUTO_BUY_WORKER**        | Auto Buy worker (default: True)                                                                               |
-| **MAX_NUMBER_OF_WORKER_TO_BUY**  | Max number of worker (without protection) to buy (default: 3)                                           |
-| **USE_PROXY_FROM_FILE**    | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
+| Settings 				   	     	                      |												 Description 											 |
+|----------------------------------------------|:-------------------------------------------------------------------------------------------------------:|
+| **API_ID / API_HASH**                        | Platform data from which to run the Telegram session (default - android)                                      |       
+| **REF_LINK**                                 | Put your ref link here (10% for me)			                                                             |
+| **AUTO_TASK**                                | Auto do tasks (default: True)                                                                                 |
+| **AUTO_TAP**                                 | Auto tap to earn point (default: True)                                                                        |
+| **AUTO_BOOST**                               | Auto use full energy boost (default: True)                                                                    |
+| **TAP_COUNT**                                | Random ammount of taps (default: [30, 75])                                                                    |
+| **SLEEP_BY_MIN_ENERGY**                      | Minium energy to sleep (default: 100)                                                                         |
+| **SLEEP_BETWEEN_TAPS**                       | Random sleep time between each taps (default: [15, 30])                                                       |
+| **AUTO_MANAGE_FACTORY**                      | Auto manage factory (default: True)                                                                           |
+| **AUTO_BUY_WORKER**                          | Auto Buy worker (default: True)                                                                               |
+| **MAX_NUMBER_OF_WORKER_TO_BUY**              | Max number of worker (without protection) to buy (default: 3)                                           |
+| **AUTO_BUY_WORKING_PLACE**                   | Auto buy workplaces (default: True)                                                       |
+| **MAX_NUMBER_OF_WORKING_PLACE_TO_BUY**       | Max workplaces to buy (default: 10 - Max is 20)                                                       |
+| **USE_PROXY_FROM_FILE**                      | Whether to use a proxy from the bot/config/proxies.txt file (True / False)                                    |
 
 
 
